@@ -4,6 +4,6 @@ This service provides a GraphQL API for CRUD operations on Track Interview resou
 ## Quickstart
 To compile and run Track Interview GraphQL API
 ```bash
-sbt ~reStart
+sbt run
 ```
 
