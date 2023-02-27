@@ -1,36 +1,37 @@
 import akka.actor.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import scala.io.StdIn
+import akka.stream.ActorMaterializer
+import akka.http.scaladsl.server.Directives._
+import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.Await
+import scala.language.postfixOps
 
-object Server {
+object Server extends App {
 
-  def main(args: Array[String]): Unit = {
-    implicit val system: ActorSystem = ActorSystem("my-system")
-    implicit val executionContext: ExecutionContextExecutor = system.dispatcher
+  val PORT = 8080
 
-    val route =
-      path("hello") {
-        get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
-        }
-      }
+  implicit val actorSystem = ActorSystem("graphql-server")
+  implicit val materializer = ActorMaterializer()
 
-    val bindingFuture = Http().newServerAt("localhost", 8080).bind(route)
-    println(s"Server now online. Please navigate to http://localhost:8080/hello\nPress RETURN to stop...")
+  import actorSystem.dispatcher
+  import scala.concurrent.duration._
 
-    StdIn.readLine() // let it run until user presses return
-    bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
+  scala.sys.addShutdownHook(() -> shutdown())
+
+  val route: Route = {
+    complete("Hello GrahpQL Scala!!!")
+  }
+
+  Http().bindAndHandle(route, "0.0.0.0", PORT)
+  println(s"open a browser with URL: http://localhost:$PORT")
+
+
+  def shutdown(): Unit = {
+    actorSystem.terminate()
+    Await.result(actorSystem.whenTerminated, 30 seconds)
   }
 }
-
-
-
 
