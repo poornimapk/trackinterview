@@ -5,6 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import sangria.GraphQLServer
 
 import scala.concurrent.Await
 import scala.language.postfixOps
@@ -22,7 +23,13 @@ object Server extends App {
   scala.sys.addShutdownHook(() -> shutdown())
 
   val route: Route = {
-    complete("Hello GrahpQL Scala!!!")
+    (post & path("graphql")) {
+      entity(as[JsValue]) { requestJson =>
+        GraphQLServer.endpoint(requestJson)
+      }
+    } ~ {
+      getFromResource("graphiql.html")
+    }
   }
 
   Http().bindAndHandle(route, "0.0.0.0", PORT)

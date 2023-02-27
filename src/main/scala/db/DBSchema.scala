@@ -9,7 +9,7 @@ import models._
 
 object DBSchema {
   /**
-   * Load schema and populate sample data withing this Sequence od DBActions
+   * Load schema and populate sample data within this Sequence od DBActions
    */
   class UsersTable(tag: Tag) extends Table[User](tag, "Users") {
     def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)

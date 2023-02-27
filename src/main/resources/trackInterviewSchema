@@ -1,0 +1,42 @@
+type Query {
+  allUsers(filter: UserFilter, skip: Int, first: Int): [User!]!
+  _allUsersMeta: _QueryMeta!
+}
+
+type Mutation {
+
+}
+
+type Subscription {
+
+}
+
+interface Node {
+  id: ID!
+}
+
+type User implements Node {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  email: String!
+  firstName: String!
+  lastName: String!
+}
+
+input UserFilter {
+  OR: [UserFilter!]
+  email_contains: String
+  firstName_contains: String
+}
+
+enum _ModelMutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+type _QueryMeta {
+  count: Int!
+}
+
+scalar DateTime
