@@ -13,4 +13,10 @@ class DAO(db: Database) {
   def getUsers(ids: Seq[Int]) = db.run(
     Users.filter(_.id inSet ids).result
   )
+
+  def allCompanies = db.run(Companies.result)
+
+  def getCompanies(ids: Seq[Int]) = db.run(
+    Companies.filter(_.id inSet ids).result
+  )
 }

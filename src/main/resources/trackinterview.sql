@@ -49,6 +49,7 @@ CREATE TABLE "trackinterview"."jobs" (
   "company_id" int,
   "job_description" varchar,
   "recruiter_id" int,
+  "job_link" varchar,
   "status" trackinterview.job_status,
   "user_id" int UNIQUE NOT NULL,
   "comment_id" int,
