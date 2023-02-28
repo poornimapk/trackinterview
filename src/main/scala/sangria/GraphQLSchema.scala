@@ -5,13 +5,29 @@ import models._
 import sangria.schema._
 import sangria.macros.derive._
 import sangria.execution.deferred.{Fetcher, HasId, DeferredResolver}
+import sangria.ast.StringValue
+import akka.http.scaladsl.model.DateTime
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object GraphQLSchema {
 
-  //implicit val UserType = deriveObjectType[Unit, User]()
-  implicit val UserType = ObjectType[Unit, User](
+  implicit val GraphQLDateTime = ScalarType[DateTime](
+    "DateTime",
+    coerceOutput = (dt, _) => dt.toString,
+    coerceInput = {
+      case StringValue(dt, _, _, _, _) => DateTime.fromIsoDateTimeString(dt).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    },
+    coerceUserInput = {
+      case s: String => DateTime.fromIsoDateTimeString(s).toRight(DateTimeCoerceViolation)
+      case _ => Left(DateTimeCoerceViolation)
+    }
+  )
+  implicit val UserType = deriveObjectType[Unit, User](
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+  )
+  /*implicit val UserType = ObjectType[Unit, User](
     "User",
     fields[Unit, User](
       Field("id", IntType, resolve = _.value.id),
@@ -19,7 +35,7 @@ object GraphQLSchema {
       Field("firstName", StringType, resolve = _.value.firstName),
       Field("lastName", StringType, resolve = _.value.lastName)
     )
-  )
+  )*/
 
   implicit val userHasId = HasId[User, Int](_.id)
   val usersFetcher = Fetcher(
