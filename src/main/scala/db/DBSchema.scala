@@ -29,14 +29,6 @@ object DBSchema {
 
   val Users = TableQuery[UsersTable]
 
-  val databaseSetupUsers = DBIO.seq(
-    Users.schema.create,
-    Users forceInsertAll Seq(
-      User(1, "sample1@gmail.com", "Sample1FN", "Sample1LN", "pass123", DateTime(2023, 2, 27)),
-      User(2, "sample2@gmail.com", "Sample2FN", "Sample2LN", "pass234", DateTime(2023, 2, 28)),
-      User(3, "sample3@gmail.com", "Sample3FN", "Sample3LN", "pass345", DateTime(2023, 2, 26))
-    )
-  )
   class CompaniesTable(tag: Tag) extends Table[Company](tag, "Companies") {
     def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
     def name = column[String]("NAME")
@@ -45,15 +37,6 @@ object DBSchema {
   }
 
   val Companies = TableQuery[CompaniesTable]
-
-  val databaseSetupCompanies = DBIO.seq(
-    Companies.schema.create,
-    Companies forceInsertAll Seq(
-      Company(1, "SampleCompany1", DateTime(2023, 2, 27)),
-      Company(2, "SampleCompany2", DateTime(2023, 2, 28)),
-      Company(3, "SampleCompany3", DateTime(2023, 2, 26)),
-    )
-  )
 
   class RecruitersTable(tag: Tag) extends Table[Recruiter](tag, "Recruiters") {
     def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
@@ -67,8 +50,20 @@ object DBSchema {
 
   val Recruiters = TableQuery[RecruitersTable]
 
-  val databaseSetupRecruiters = DBIO.seq(
+  val databaseSetup = DBIO.seq(
+    Users.schema.create,
+    Companies.schema.create,
     Recruiters.schema.create,
+    Users forceInsertAll Seq(
+      User(1, "sample1@gmail.com", "Sample1FN", "Sample1LN", "pass123", DateTime(2023, 2, 27)),
+      User(2, "sample2@gmail.com", "Sample2FN", "Sample2LN", "pass234", DateTime(2023, 2, 28)),
+      User(3, "sample3@gmail.com", "Sample3FN", "Sample3LN", "pass345", DateTime(2023, 2, 26))
+    ),
+    Companies forceInsertAll Seq(
+      Company(1, "SampleCompany1", DateTime(2023, 2, 27)),
+      Company(2, "SampleCompany2", DateTime(2023, 2, 28)),
+      Company(3, "SampleCompany3", DateTime(2023, 2, 26)),
+    ),
     Recruiters forceInsertAll Seq(
       Recruiter(1, "recruiter1@email.com", "Rec1FirstName", "Rec1LastName", 1, DateTime(2023, 2, 27)),
       Recruiter(2, "recruiter2@email.com", "Rec2FirstName", "Rec2LastName", 1, DateTime(2023, 2, 27)),
@@ -79,9 +74,7 @@ object DBSchema {
   def createDatabase: DAO = {
     val db = Database.forConfig("h2mem")
 
-    Await.result(db.run(databaseSetupUsers), 10 seconds)
-    Await.result(db.run(databaseSetupCompanies), 10 seconds)
-    Await.result(db.run(databaseSetupRecruiters), 10 seconds)
+    Await.result(db.run(databaseSetup), 10 seconds)
     new DAO(db)
 
   }

@@ -24,16 +24,26 @@ object GraphQLSchema {
       case _ => Left(DateTimeCoerceViolation)
     }
   )
+  val IdentifiableType = InterfaceType(
+    "Identifiable",
+    fields[Unit, Identifiable](
+      Field("id", IntType, resolve = _.value.id)
+    )
+  )
+
   implicit val UserType = deriveObjectType[Unit, User](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt)),
+    Interfaces(IdentifiableType)
   )
 
   implicit val CompanyType = deriveObjectType[Unit, Company](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt)),
+    Interfaces(IdentifiableType)
   )
 
   implicit val RecruiterType = deriveObjectType[Unit, Recruiter](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt)),
+    Interfaces(IdentifiableType)
   )
   /*implicit val UserType = ObjectType[Unit, User](
     "User",
@@ -45,22 +55,26 @@ object GraphQLSchema {
     )
   )*/
 
-  implicit val userHasId = HasId[User, Int](_.id)
+  //implicit val userHasId = HasId[User, Int](_.id)
   val usersFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getUsers(ids)
   )
 
-  implicit val companyHasId = HasId[Company, Int](_.id)
+  //implicit val companyHasId = HasId[Company, Int](_.id)
   val companiesFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getCompanies(ids)
   )
 
-  implicit val recruiterHasId = HasId[Recruiter, Int](_.id)
+  //implicit val recruiterHasId = HasId[Recruiter, Int](_.id)
   val recruitersFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getRecruiters(ids)
   )
 
-  val Resolver = DeferredResolver.fetchers(usersFetcher, companiesFetcher)
+  val Resolver = DeferredResolver.fetchers(
+            usersFetcher,
+            companiesFetcher,
+            recruitersFetcher
+  )
 
   val Id = Argument("id", IntType)
   val Ids = Argument("ids", ListInputType(IntType))
