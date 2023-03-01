@@ -31,6 +31,10 @@ object GraphQLSchema {
   implicit val CompanyType = deriveObjectType[Unit, Company](
     ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
   )
+
+  implicit val RecruiterType = deriveObjectType[Unit, Recruiter](
+    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+  )
   /*implicit val UserType = ObjectType[Unit, User](
     "User",
     fields[Unit, User](
@@ -49,6 +53,11 @@ object GraphQLSchema {
   implicit val companyHasId = HasId[Company, Int](_.id)
   val companiesFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getCompanies(ids)
+  )
+
+  implicit val recruiterHasId = HasId[Recruiter, Int](_.id)
+  val recruitersFetcher = Fetcher(
+    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getRecruiters(ids)
   )
 
   val Resolver = DeferredResolver.fetchers(usersFetcher, companiesFetcher)
@@ -81,6 +90,14 @@ object GraphQLSchema {
         arguments = Ids :: Nil,
         //resolve = c => c.ctx.dao.getUsers(c.arg(Ids))
         resolve = c => companiesFetcher.deferSeq(c.arg(Ids))
+      ),
+      Field("allRecruiters", ListType(RecruiterType), description = Some(s"Returns all Recruiters"), arguments = Nil, resolve = c => c.ctx.dao.allRecruiters),
+      Field("recruiters",
+        ListType(RecruiterType),
+        description = Some(s"Returns one or more recruiters based on the input Ids argument"),
+        arguments = Ids :: Nil,
+        //resolve = c => c.ctx.dao.getUsers(c.arg(Ids))
+        resolve = c => recruitersFetcher.deferSeq(c.arg(Ids))
       ),
     )
   )
