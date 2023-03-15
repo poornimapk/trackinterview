@@ -19,4 +19,6 @@ package object models {
   case class Company(id: Int, name: String, createdAt: DateTime) extends Identifiable
 
   case class Recruiter(id: Int, email: String, firstName: String, lastName: String, companyId: Int, createdAt: DateTime) extends Identifiable
+
+  case class Job(id: Int, userId: Int, companyId: Int, recruiterId: Int, description: String, link: String, status: String, comment: String, createdAt: DateTime) extends Identifiable
 }

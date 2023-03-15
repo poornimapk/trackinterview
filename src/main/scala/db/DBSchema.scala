@@ -50,10 +50,27 @@ object DBSchema {
 
   val Recruiters = TableQuery[RecruitersTable]
 
+  class JobsTable(tag: Tag) extends Table[Job](tag, "Jobs") {
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def userId = column[Int]("USER_ID")
+    def companyId = column[Int]("COMPANY_ID")
+    def recruiterId = column[Int]("RECRUITER_ID")
+    def description = column[String]("DESCRIPTION")
+    def link = column[String]("LINK")
+    def status = column[String]("STATUS")
+    def comment = column[String]("COMMENT")
+    def createdAt = column[DateTime]("CREATED_AT")
+
+    def * = (id, userId, companyId, recruiterId, description, link, status, comment, createdAt).mapTo[Job]
+  }
+
+  val Jobs = TableQuery[JobsTable]
+
   val databaseSetup = DBIO.seq(
     Users.schema.create,
     Companies.schema.create,
     Recruiters.schema.create,
+    Jobs.schema.create,
     Users forceInsertAll Seq(
       User(1, "sample1@gmail.com", "Sample1FN", "Sample1LN", "pass123", DateTime(2023, 2, 27)),
       User(2, "sample2@gmail.com", "Sample2FN", "Sample2LN", "pass234", DateTime(2023, 2, 28)),
@@ -69,6 +86,14 @@ object DBSchema {
       Recruiter(2, "recruiter2@email.com", "Rec2FirstName", "Rec2LastName", 1, DateTime(2023, 2, 27)),
       Recruiter(3, "recruiter3@email.com", "Rec3FirstName", "Rec3LastName", 1, DateTime(2023, 2, 27)),
       Recruiter(4, "recruiter4@email.com", "Rec4FirstName", "Rec4LastName", 2, DateTime(2023, 2, 28))
+    ),
+    Jobs forceInsertAll Seq(
+      Job(1, 1, 1, 1, "First job by User1 Company1 Recruiter1", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
+      Job(2, 1, 2, 2, "Second job by User1 Company1 Recruiter1", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
+      Job(3, 2, 1, 1, "First job by User2 Company1 Recruiter1", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
+      Job(4, 2, 2, 2, "Second job by User2 Company2 Recruiter2", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
+      Job(5, 3, 1, 1, "First job by User3 Company1 Recruiter1", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
+      Job(6, 3, 2, 2, "Second job by User3 Company2 Recruiter2", "https://sample.com", "Waiting for response from Recruiter", "Follow-up with recruiter", DateTime(2023, 3, 15)),
     )
   )
   def createDatabase: DAO = {

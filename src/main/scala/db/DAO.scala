@@ -25,4 +25,10 @@ class DAO(db: Database) {
   def getRecruiters(ids: Seq[Int]) = db.run(
     Recruiters.filter(_.id inSet ids).result
   )
+
+  def allJobs = db.run(Jobs.result)
+
+  def getJobs(ids: Seq[Int]) = db.run(
+    Jobs.filter(_.id inSet ids).result
+  )
 }
